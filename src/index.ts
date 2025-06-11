@@ -443,11 +443,13 @@ async function handleCallback(request: Request): Promise<Response> {
 					padding-top: 20px;
 				}
 				
-				/* 手机端适配 */
-				@media (max-width: 768px) {
-					body { margin: .5rem; padding: 0; }
-					.container { padding: 1rem; }
-				}
+        		/* 手机端适配 */
+        		@media (max-width: 768px) {
+        		    body { margin: .5rem; padding: 0; }
+        		    .container { padding: 1rem; }
+					h1{ font-size: 1.8rem; }
+					h2{ font-size: 1.5rem; }
+        		}
 			</style>
 		</head>
 		<body>
