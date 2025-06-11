@@ -494,6 +494,14 @@ async function handleCallback(request: Request): Promise<Response> {
 							<button class="copy-btn" onclick="copyText('displayClientSecret')">复制</button>
 						</div>
 						
+						<label>回调地址 (Redirect URI):</label>
+						<div class="token-container">
+							<div class="token-display-with-btn" id="displayRedirectUri">
+								<span id="redirectUriText"></span>
+							</div>
+							<button class="copy-btn" onclick="copyText('displayRedirectUri')">复制</button>
+						</div>
+						
 						<label>Access Token:</label>
 						<div class="token-container">
 							<div class="token-display-with-btn" id="displayAccessToken">
@@ -598,6 +606,7 @@ async function handleCallback(request: Request): Promise<Response> {
 							credentials = {
 								clientId: clientId,
 								clientSecret: clientSecret,
+								redirectUri: window.location.origin + '/onedrive/callback',
 								accessToken: result.access_token,
 								refreshToken: result.refresh_token
 							};
@@ -605,6 +614,7 @@ async function handleCallback(request: Request): Promise<Response> {
 							// 显示所有凭据
 							document.getElementById('clientIdText').textContent = credentials.clientId;
 							document.getElementById('clientSecretText').textContent = credentials.clientSecret;
+							document.getElementById('redirectUriText').textContent = credentials.redirectUri;
 							document.getElementById('accessTokenText').textContent = credentials.accessToken;
 							document.getElementById('refreshTokenText').textContent = credentials.refreshToken;
 							
@@ -642,6 +652,8 @@ async function handleCallback(request: Request): Promise<Response> {
 Client ID: \${credentials.clientId}
 
 Client Secret: \${credentials.clientSecret}
+
+回调地址 (Redirect URI): \${credentials.redirectUri}
 
 Access Token: \${credentials.accessToken}
 
