@@ -445,7 +445,7 @@ async function handleCallback(request: Request): Promise<Response> {
 				
 				/* 手机端适配 */
 				@media (max-width: 768px) {
-					body { margin: 0; padding: 0; }
+					body { margin: .5rem; padding: 0; }
 					.container { padding: 1rem; }
 				}
 			</style>
