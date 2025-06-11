@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>完成授权</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 15px;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        h1,
+        h2 {
+            color: #007bff;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        label {
+            font-weight: bold;
+            margin-top: 1rem;
+            display: block;
+        }
+
+        input,
+        button {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        input:read-only {
+            background-color: #f8f9fa;
+            border-color: #dee2e6;
+            color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button:disabled {
+            background-color: #a8a9ab;
+            border-color: #a8a9ab;
+            cursor: not-allowed;
+        }
+
+        .info {
+            background-color: #e9f7fe;
+            border-left: 5px solid #007bff;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .success {
+            background-color: #d4edda;
+            border-left: 5px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            border-left: 5px solid #dc3545;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .loading {
+            text-align: center;
+            margin: 20px 0;
+            color: #007bff;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-left: 10px;
+            border: 2px solid #007bff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .token-container {
+            margin: 10px 0;
+        }
+
+        .token-display {
+            background-color: #e9ecef;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 10px;
+            word-break: break-all;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 14px;
+            max-height: 120px;
+            overflow-y: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .token-display::-webkit-scrollbar {
+            display: none;
+        }
+
+        .token-display:hover {
+            background-color: #dee2e6;
+            border-color: #007bff;
+        }
+
+        .token-display.refresh-token {
+            max-height: 200px;
+        }
+
+        .token-display.copied {
+            background-color: #d4edda;
+            border-color: #28a745;
+            transform: scale(1.01);
+        }
+
+        .copy-feedback {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100%);
+            background-color: #28a745;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transition: all 0.4s ease;
+            z-index: 1000;
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .copy-feedback.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .button-group button {
+            flex: 1;
+        }
+
+        .credentials-section {
+            margin-top: 20px;
+            border-top: 2px solid #eee;
+            padding-top: 20px;
+        }
+
+        /* 手机端适配 */
+        @media (max-width: 768px) {
+            body {
+                margin: 0;
+                padding: 0;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🎉 授权成功！</h1>
+        <div id="inputSection">
+            <div class="info">
+                已收到授权码，请确认您的 Client ID 和 Client Secret：
+            </div>
+
+            <label for="clientId">Client ID:</label>
+            <div class="token-container">
+                <div class="token-display" id="inputClientId">
+                    <span id="inputClientIdText">正在从存储中读取...</span>
+                </div>
+            </div>
+
+            <label for="clientSecret">Client Secret:</label>
+            <div class="token-container">
+                <div class="token-display" id="inputClientSecret">
+                    <span id="inputClientSecretText">正在从存储中读取...</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="loading" class="loading" style="display: none;">
+            正在获取 Access Token 和 Refresh Token
+        </div>
+
+        <div id="error" class="error" style="display: none;"></div>
+
+        <div id="result" style="display: none;">
+            <div class="success">
+                ✅ <strong>获取成功！</strong> 恭喜您已成功获取到 OneDrive 的所有凭据信息。
+            </div>
+
+            <div class="credentials-section">
+                <h2>📋 完整凭据信息</h2>
+                <label>Client ID:</label>
+                <div class="token-container">
+                    <div class="token-display" id="displayClientId" onclick="copyText('clientIdText')">
+                        <span id="clientIdText"></span>
+                    </div>
+                </div>
+
+                <label>Client Secret:</label>
+                <div class="token-container">
+                    <div class="token-display" id="displayClientSecret" onclick="copyText('clientSecretText')">
+                        <span id="clientSecretText"></span>
+                    </div>
+                </div>
+
+                <label>回调地址 (Redirect URI):</label>
+                <div class="token-container">
+                    <div class="token-display" id="displayRedirectUri" onclick="copyText('redirectUriText')">
+                        <span id="redirectUriText"></span>
+                    </div>
+                </div>
+
+                <label>Access Token:</label>
+                <div class="token-container">
+                    <div class="token-display" id="displayAccessToken" onclick="copyText('accessTokenText')">
+                        <span id="accessTokenText"></span>
+                    </div>
+                </div>
+
+                <label>Refresh Token:</label>
+                <div class="token-container">
+                    <div class="token-display refresh-token" id="displayRefreshToken"
+                        onclick="copyText('refreshTokenText')">
+                        <span id="refreshTokenText"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button onclick="copyAllCredentials()">复制所有凭据</button>
+                <button onclick="goHome()">返回首页</button>
+            </div>
+
+            <div class="info">
+                <strong>✅ 完成！</strong>您现在已经集齐了挂载OneDrive所需的全部信息。<br />
+                • <strong>Client ID</strong> 和 <strong>Client Secret</strong> 用于应用身份认证<br />
+                • <strong>Access Token</strong> 用于短期API访问（有效期约1小时）<br />
+                • <strong>Refresh Token</strong> 用于长期访问（可用于刷新Access Token）
+            </div>
+        </div>
+    </div>
+
+    <!-- 复制成功提示 -->
+    <div class="copy-feedback" id="copyFeedback">✅ 已复制到剪贴板</div>
+
+    <script>
+        let authCode = '{{CODE}}'; // 将由 Cloudflare Worker 替换
+        let credentials = {};
+        // 页面加载时自动尝试获取token
+        window.onload = function () {
+            const clientId = localStorage.getItem('onedrive_client_id');
+            const clientSecret = localStorage.getItem('onedrive_client_secret');
+
+            if (clientId) {
+                document.getElementById('inputClientIdText').textContent = clientId;
+            } else {
+                document.getElementById('inputClientIdText').textContent = '未找到存储的 Client ID';
+            }
+
+            if (clientSecret) {
+                document.getElementById('inputClientSecretText').textContent = clientSecret;
+            } else {
+                document.getElementById('inputClientSecretText').textContent = '未找到存储的 Client Secret';
+            }
+
+            // 如果都有值，自动执行
+            if (clientId && clientSecret) {
+                // 延迟执行，给用户时间看到凭据信息
+                setTimeout(exchangeToken, 1000);
+            }
+        };
+        async function exchangeToken() {
+            const clientId = localStorage.getItem('onedrive_client_id');
+            const clientSecret = localStorage.getItem('onedrive_client_secret');
+
+            if (!clientId || !clientSecret) {
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('error').textContent = '错误: 未找到存储的 Client ID 或 Client Secret';
+                return;
+            }
+
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('error').style.display = 'none';
+
+            try {
+                const response = await fetch('/api/token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        clientId,
+                        clientSecret,
+                        code: authCode,
+                        redirectUri: window.location.origin + '/onedrive/callback'
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    credentials = {
+                        clientId: clientId,
+                        clientSecret: clientSecret,
+                        redirectUri: window.location.origin + '/onedrive/callback',
+                        accessToken: result.access_token,
+                        refreshToken: result.refresh_token
+                    };
+
+                    // 显示所有凭据
+                    document.getElementById('clientIdText').textContent = credentials.clientId;
+                    document.getElementById('clientSecretText').textContent = credentials.clientSecret;
+                    document.getElementById('redirectUriText').textContent = credentials.redirectUri;
+                    document.getElementById('accessTokenText').textContent = credentials.accessToken;
+                    document.getElementById('refreshTokenText').textContent = credentials.refreshToken;
+
+                    document.getElementById('result').style.display = 'block';
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('inputSection').style.display = 'none';
+                } else {
+                    throw new Error(result.error || '获取 token 失败');
+                }
+            } catch (error) {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('error').textContent = '错误: ' + error.message;
+            }
+        }
+        function copyText(spanId) {
+            const textElement = document.getElementById(spanId);
+            const text = textElement.textContent;
+            const container = textElement.parentElement;
+
+            copyToClipboard(text).then(() => {
+                showCopyFeedback();
+                updateContainerState(container);
+            });
+        }
+
+        function copyAllCredentials() {
+            const allText = `OneDrive 凭据信息：
+
+Client ID: ${credentials.clientId}
+
+Client Secret: ${credentials.clientSecret}
+
+回调地址 (Redirect URI): ${credentials.redirectUri}
+
+Access Token: ${credentials.accessToken}
+
+Refresh Token: ${credentials.refreshToken}`;
+
+            copyToClipboard(allText).then(() => {
+                showCopyFeedback('✅ 所有凭据已复制到剪贴板');
+            });
+        }
+
+        // 统一的复制到剪贴板函数
+        function copyToClipboard(text) {
+            return navigator.clipboard.writeText(text).catch(() => {
+                // 降级方案
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                return Promise.resolve();
+            });
+        }
+        // 统一的容器状态更新函数
+        function updateContainerState(container) {
+            container.classList.add('copied');
+
+            setTimeout(() => {
+                container.classList.remove('copied');
+            }, 1000);
+        }
+
+        function showCopyFeedback(message = '✅ 已复制到剪贴板') {
+            const feedback = document.getElementById('copyFeedback');
+            feedback.textContent = message;
+            feedback.classList.add('show');
+
+            setTimeout(() => {
+                feedback.classList.remove('show');
+            }, 3000);
+        }
+
+        function goHome() {
+            window.location.href = '/?refresh_token=' + encodeURIComponent(credentials.refreshToken);
+        }
+    </script>
+</body>
+
+</html>

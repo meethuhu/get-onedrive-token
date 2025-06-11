@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OneDrive 令牌获取助手</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 15px;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        h1,
+        h2 {
+            color: #007bff;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        label {
+            font-weight: bold;
+            margin-top: 1rem;
+            display: block;
+        }
+
+        input,
+        button,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .info {
+            background-color: #e9f7fe;
+            border-left: 5px solid #007bff;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .success {
+            background-color: #d4edda;
+            border-left: 5px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            border-left: 5px solid #dc3545;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .code-inline {
+            background-color: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: "Courier New", Courier, monospace;
+            word-break: break-all;
+            overflow-wrap: break-word;
+        }
+
+        .tutorial {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .tutorial h3 {
+            color: #495057;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .tutorial h3:first-child {
+            margin-top: 0;
+        }
+
+        .tutorial ol {
+            padding-left: 1.5rem;
+        }
+
+        .tutorial li {
+            margin-bottom: 0.5rem;
+        }
+
+        .warning {
+            background-color: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        /* 手机端适配 */
+        @media (max-width: 768px) {
+            body {
+                margin: .5rem;
+                padding: 0;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>OneDrive 令牌获取助手</h1>
+        <p>本工具会引导您完成手动获取 Refresh Token 的所有步骤，全程保障您的凭据安全。</p>
+
+        <div class="tutorial">
+            <h2>📋 应用注册教程</h2>
+            <p>在使用本工具之前，您需要先在 Microsoft Entra ID 中注册一个应用。请按照以下步骤操作：</p>
+
+            <h3>1. 登录 Microsoft Entra ID 管理中心</h3>
+            <ol>
+                <li>访问 <a href="https://entra.microsoft.com/" target="_blank">Microsoft Entra 管理中心</a></li>
+                <li>使用你的 Microsoft 账户登录</li>
+            </ol>
+
+            <h3>2. 注册新应用</h3>
+            <ol>
+                <li>在左侧导航栏中，依次选择「标识 (Identity)」>「应用程序 (Applications)」>「应用注册 (App registrations)」</li>
+                <li>点击「+ 新注册 (+ New registration)」</li>
+            </ol>
+
+            <h3>3. 填写应用信息</h3>
+            <ol>
+                <li><strong>名称 (Name)：</strong>给你的应用取一个容易识别的名字，例如 <code class="code-inline">MyOneDriveTool</code></li>
+                <li><strong>支持的帐户类型 (Supported account types)：</strong>务必选择「任何组织目录(任何 Microsoft Entra ID 租户 -
+                    多租户)中的帐户和个人 Microsoft 帐户(例如 Skype、Xbox)」</li>
+                <li><strong>重定向 URI (Redirect URI)：</strong>
+                    <ul>
+                        <li>选择平台为「Web」</li>
+                        <li>在 URL 输入框中填入 <code class="code-inline" id="callbackUrl"></code></li>
+                    </ul>
+                </li>
+                <li>点击「注册 (Register)」</li>
+            </ol>
+
+            <h3>4. 获取 Client ID</h3>
+            <p>注册成功后，页面会跳转到应用的概述页。在这里你可以找到并复制「应用程序(客户端) ID (Application (client) ID)」，这就是你的 <code
+                    class="code-inline">client_id</code>。请妥善保存。</p>
+
+            <h3>5. 创建 Client Secret</h3>
+            <ol>
+                <li>在应用页面的左侧导航栏，选择「证书和密码 (Certificates & secrets)」</li>
+                <li>点击「+ 新客户端密码 (+ New client secret)」</li>
+                <li><strong>说明 (Description)：</strong>随意填写，例如 <code class="code-inline">mysecret</code></li>
+                <li><strong>过期 (Expires)：</strong>选择最长的时间，例如「24 个月 (24 months)」</li>
+                <li>点击「添加 (Add)」</li>
+            </ol>
+
+            <div class="warning">
+                <strong>⚠️ 重要提醒：</strong> <br>此时页面会生成一个客户端密码，它的「值 (Value)」只会显示这一次。请立即复制并保存好，这就是你的 <code
+                    class="code-inline">client_secret</code>。关闭页面后将无法再次查看！
+            </div>
+        </div>
+
+        <h2>🚀 开始获取令牌</h2>
+        <p>完成应用注册后，请在下方输入您获得的 Client ID 和 Client Secret：</p>
+
+        <label for="clientId">Client ID:</label>
+        <input type="text" id="clientId" placeholder="在此处粘贴您的 Client ID">
+
+        <label for="clientSecret">Client Secret:</label>
+        <input type="text" id="clientSecret" placeholder="在此处粘贴您的 Client Secret">
+
+        <div class="info">
+            <strong>⚠️ 重要提醒：</strong><br />
+            在 Azure 应用注册时，请确保添加重定向 URI：<code class="code-inline" id="callbackUrlInfo"></code><br />
+            此 URI 必须与您在应用注册中配置的重定向 URI 完全一致，否则授权将失败。
+        </div>
+
+        <button onclick="startAuth()">开始授权</button>
+    </div>
+
+    <script>
+        // 设置回调地址
+        function setCallbackUrl() {
+            const baseUrl = window.location.origin;
+            const callbackUrl = baseUrl + '/onedrive/callback';
+            document.getElementById('callbackUrl').textContent = callbackUrl;
+            document.getElementById('callbackUrlInfo').textContent = callbackUrl;
+        }
+
+        function startAuth() {
+            const clientId = document.getElementById('clientId').value.trim();
+            const clientSecret = document.getElementById('clientSecret').value.trim();
+
+            if (!clientId || !clientSecret) {
+                showValidationError("请输入 Client ID 和 Client Secret！");
+                return;
+            }
+
+            // 保存到 localStorage
+            localStorage.setItem('onedrive_client_id', clientId);
+            localStorage.setItem('onedrive_client_secret', clientSecret);
+
+            const baseUrl = window.location.origin;
+            const redirectUri = baseUrl + '/onedrive/callback';
+
+            // 构建授权 URL
+            const authUrl = new URL('https://login.microsoftonline.com/common/oauth2/v2.0/authorize');
+            authUrl.searchParams.append('client_id', clientId);
+            authUrl.searchParams.append('scope', 'files.readwrite.all offline_access');
+            authUrl.searchParams.append('response_type', 'code');
+            authUrl.searchParams.append('redirect_uri', redirectUri);
+
+            // 跳转到授权页面
+            window.location.href = authUrl.toString();
+        }
+
+        function showValidationError(message) {
+            // 创建临时错误提示元素
+            const feedback = document.createElement('div');
+            feedback.textContent = '⚠️ ' + message;
+            feedback.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%) translateY(-100%);
+                background-color: #dc3545;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 6px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                z-index: 1000;
+                font-size: 14px;
+                font-weight: 500;
+                opacity: 0;
+                transition: all 0.4s ease;
+                white-space: nowrap;
+            `;
+
+            document.body.appendChild(feedback);
+            // 触发动画
+            setTimeout(() => {
+                feedback.style.opacity = '1';
+                feedback.style.transform = 'translateX(-50%) translateY(0)';
+            }, 10);
+
+            // 3秒后移除
+            setTimeout(() => {
+                feedback.style.opacity = '0';
+                feedback.style.transform = 'translateX(-50%) translateY(-100%)';
+                setTimeout(() => {
+                    document.body.removeChild(feedback);
+                }, 400);
+            }, 3000);
+        }
+
+        // 页面加载时执行
+        window.onload = function () {
+            setCallbackUrl();
+        };
+    </script>
+
+</body>
+
+</html>
