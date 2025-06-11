@@ -7,7 +7,4 @@
 ---
 
 ### 一键部署：<br>
-[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/meethuhu/get-onedrive-token)
-
-### 手动部署：<br>
-复制 `/src/index.ts` 内容到 cloudflare workers
+[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/meethuhu/get-onedrive-token/tree/multiple-files)
