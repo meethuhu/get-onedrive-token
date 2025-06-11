@@ -26,13 +26,20 @@ const HTML_CONTENT = `<!DOCTYPE html>
         .info { background-color: #e9f7fe; border-left: 5px solid #007bff; padding: 15px; margin: 15px 0; }
         .success { background-color: #d4edda; border-left: 5px solid #28a745; padding: 15px; margin: 15px 0; }
         .error { background-color: #f8d7da; border-left: 5px solid #dc3545; padding: 15px; margin: 15px 0; }
-        .code-inline { background-color: #e9ecef; padding: 2px 6px; border-radius: 3px; font-family: "Courier New", Courier, monospace; }
+        .code-inline { background-color: #e9ecef; padding: 2px 6px; border-radius: 3px; font-family: "Courier New", Courier, monospace; word-break: break-all; overflow-wrap: break-word; }
         .tutorial { background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; margin: 20px 0; }
         .tutorial h3 { color: #495057; margin-top: 1.5rem; margin-bottom: 0.5rem; }
         .tutorial h3:first-child { margin-top: 0; }
-        .tutorial ol { padding-left: 1.5rem; }
-        .tutorial li { margin-bottom: 0.5rem; }
+        .tutorial ol { padding-left: 1.5rem; }        .tutorial li { margin-bottom: 0.5rem; }
         .warning { background-color: #fff3cd; border-left: 5px solid #ffc107; padding: 15px; margin: 15px 0; }
+        
+        /* 手机端适配 */
+        @media (max-width: 768px) {
+            body { margin: .5rem; padding: 0; }
+            .container { padding: 1rem; }
+			h1{ font-size: 1.8rem; }
+			h2{ font-size: 1.5rem; }
+        }
     </style>
 </head>
 <body>
@@ -144,11 +151,11 @@ const HTML_CONTENT = `<!DOCTYPE html>
         function showValidationError(message) {
             // 创建临时错误提示元素
             const feedback = document.createElement('div');
-            feedback.textContent = '⚠️ ' + message;
-            feedback.style.cssText = \`
+            feedback.textContent = '⚠️ ' + message;            feedback.style.cssText = \`
                 position: fixed;
                 top: 20px;
-                right: 20px;
+                left: 50%;
+                transform: translateX(-50%) translateY(-100%);
                 background-color: #dc3545;
                 color: white;
                 padding: 12px 20px;
@@ -158,25 +165,24 @@ const HTML_CONTENT = `<!DOCTYPE html>
                 font-size: 14px;
                 font-weight: 500;
                 opacity: 0;
-                transform: translateX(100%);
-                transition: all 0.3s ease;
+                transition: all 0.4s ease;
+                white-space: nowrap;
             \`;
             
             document.body.appendChild(feedback);
-            
-            // 触发动画
+              // 触发动画
             setTimeout(() => {
                 feedback.style.opacity = '1';
-                feedback.style.transform = 'translateX(0)';
+                feedback.style.transform = 'translateX(-50%) translateY(0)';
             }, 10);
             
             // 3秒后移除
             setTimeout(() => {
                 feedback.style.opacity = '0';
-                feedback.style.transform = 'translateX(100%)';
+                feedback.style.transform = 'translateX(-50%) translateY(-100%)';
                 setTimeout(() => {
                     document.body.removeChild(feedback);
-                }, 300);
+                }, 400);
             }, 3000);
         }
 
@@ -297,8 +303,7 @@ async function handleCallback(request: Request): Promise<Response> {
 					font-weight: bold; 
 					margin-top: 1rem; 
 					display: block; 
-				}
-				input, button { 
+				}				input, button { 
 					width: 100%; 
 					padding: 12px; 
 					margin: 8px 0; 
@@ -306,6 +311,12 @@ async function handleCallback(request: Request): Promise<Response> {
 					border: 1px solid #ccc; 
 					border-radius: 4px; 
 					font-size: 16px; 
+				}
+				input:read-only { 
+					background-color: #f8f9fa; 
+					border-color: #dee2e6; 
+					color: #6c757d; 
+					cursor: not-allowed; 
 				}
 				button { 
 					background-color: #007bff; 
@@ -318,8 +329,8 @@ async function handleCallback(request: Request): Promise<Response> {
 					background-color: #0056b3; 
 				}
 				button:disabled {
-					background-color: #6c757d;
-					border-color: #6c757d;
+					background-color: #a8a9ab;
+					border-color: #a8a9ab;
 					cursor: not-allowed;
 				}
 				.info { 
@@ -359,14 +370,11 @@ async function handleCallback(request: Request): Promise<Response> {
 				@keyframes spin {
 					to { transform: rotate(360deg); }
 				}
-				
-				/* 创建一个包装器来固定按钮位置 */
-				.token-container {
-					position: relative;
+						.token-container {
 					margin: 10px 0;
 				}
 				
-				.token-display-with-btn {
+				.token-display {
 					background-color: #e9ecef; 
 					border: 1px solid #dee2e6; 
 					border-radius: 5px; 
@@ -377,61 +385,49 @@ async function handleCallback(request: Request): Promise<Response> {
 					max-height: 120px;
 					overflow-y: auto;
 					scrollbar-width: none;
-					-ms-overflow-style: none;	
+					-ms-overflow-style: none;
+					cursor: pointer;
+					transition: all 0.3s ease;
+					position: relative;
 				}
 				
-				.token-display-with-btn::-webkit-scrollbar {
+				.token-display::-webkit-scrollbar {
 					display: none;
 				}
 				
-				.token-display-with-btn.refresh-token {
+				.token-display:hover {
+					background-color: #dee2e6;
+					border-color: #007bff;
+				}
+				
+				.token-display.refresh-token {
 					max-height: 200px;
 				}
 				
-				/* 复制按钮固定在容器外层 */
-				.copy-btn {
-					position: absolute;
-					top: 8px;
-					right: 8px;
-					background-color: #6c757d;
-					color: white;
-					border: none;
-					padding: 6px 12px;
-					border-radius: 4px;
-					cursor: pointer;
-					font-size: 12px;
-					width: auto;
-					margin: 0;
-					transition: all 0.3s ease;
-					z-index: 10;
-					white-space: nowrap;
-				}
-				.copy-btn:hover {
-					background-color: #5a6268;
-				}
-				.copy-btn.copied {
-					background-color: #28a745;
-					transform: scale(1.05);
-				}
-				.copy-feedback {
+				.token-display.copied {
+					background-color: #d4edda;
+					border-color: #28a745;
+					transform: scale(1.01);
+				}				.copy-feedback {
 					position: fixed;
 					top: 20px;
-					right: 20px;
+					left: 50%;
+					transform: translateX(-50%) translateY(-100%);
 					background-color: #28a745;
 					color: white;
 					padding: 12px 20px;
 					border-radius: 6px;
 					box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 					opacity: 0;
-					transform: translateX(100%);
-					transition: all 0.3s ease;
+					transition: all 0.4s ease;
 					z-index: 1000;
 					font-size: 14px;
 					font-weight: 500;
+					white-space: nowrap;
 				}
 				.copy-feedback.show {
 					opacity: 1;
-					transform: translateX(0);
+					transform: translateX(-50%) translateY(0);
 				}
 				.button-group {
 					display: flex;
@@ -440,28 +436,40 @@ async function handleCallback(request: Request): Promise<Response> {
 				}
 				.button-group button {
 					flex: 1;
-				}
-				.credentials-section {
+				}				.credentials-section {
 					margin-top: 20px;
 					border-top: 2px solid #eee;
 					padding-top: 20px;
+				}
+				
+				/* 手机端适配 */
+				@media (max-width: 768px) {
+					body { margin: 0; padding: 0; }
+					.container { padding: 1rem; }
 				}
 			</style>
 		</head>
 		<body>
 			<div class="container">
 				<h1>🎉 授权成功！</h1>
-				
-				<div id="inputSection">
+						<div id="inputSection">
 					<div class="info">
-						已收到授权码，请输入您的 Client ID 和 Client Secret 以完成 token 交换：
+						已收到授权码，请确认您的 Client ID 和 Client Secret：
 					</div>
 					
 					<label for="clientId">Client ID:</label>
-					<input type="text" id="clientId" placeholder="请输入 Client ID">
+					<div class="token-container">
+						<div class="token-display" id="inputClientId">
+							<span id="inputClientIdText">正在从存储中读取...</span>
+						</div>
+					</div>
 					
 					<label for="clientSecret">Client Secret:</label>
-					<input type="text" id="clientSecret" placeholder="请输入 Client Secret">
+					<div class="token-container">
+						<div class="token-display" id="inputClientSecret">
+							<span id="inputClientSecretText">正在从存储中读取...</span>
+						</div>
+					</div>
 				</div>
 				
 				<div id="loading" class="loading" style="display: none;">
@@ -477,45 +485,39 @@ async function handleCallback(request: Request): Promise<Response> {
 					
 					<div class="credentials-section">
 						<h2>📋 完整凭据信息</h2>
-						
-						<label>Client ID:</label>
+								<label>Client ID:</label>
 						<div class="token-container">
-							<div class="token-display-with-btn" id="displayClientId">
+							<div class="token-display" id="displayClientId" onclick="copyText('clientIdText')">
 								<span id="clientIdText"></span>
 							</div>
-							<button class="copy-btn" onclick="copyText('displayClientId')">复制</button>
 						</div>
 						
 						<label>Client Secret:</label>
 						<div class="token-container">
-							<div class="token-display-with-btn" id="displayClientSecret">
+							<div class="token-display" id="displayClientSecret" onclick="copyText('clientSecretText')">
 								<span id="clientSecretText"></span>
 							</div>
-							<button class="copy-btn" onclick="copyText('displayClientSecret')">复制</button>
 						</div>
 						
 						<label>回调地址 (Redirect URI):</label>
 						<div class="token-container">
-							<div class="token-display-with-btn" id="displayRedirectUri">
+							<div class="token-display" id="displayRedirectUri" onclick="copyText('redirectUriText')">
 								<span id="redirectUriText"></span>
 							</div>
-							<button class="copy-btn" onclick="copyText('displayRedirectUri')">复制</button>
 						</div>
 						
 						<label>Access Token:</label>
 						<div class="token-container">
-							<div class="token-display-with-btn" id="displayAccessToken">
+							<div class="token-display" id="displayAccessToken" onclick="copyText('accessTokenText')">
 								<span id="accessTokenText"></span>
 							</div>
-							<button class="copy-btn" onclick="copyText('displayAccessToken')">复制</button>
 						</div>
 						
 						<label>Refresh Token:</label>
 						<div class="token-container">
-							<div class="token-display-with-btn refresh-token" id="displayRefreshToken">
+							<div class="token-display refresh-token" id="displayRefreshToken" onclick="copyText('refreshTokenText')">
 								<span id="refreshTokenText"></span>
 							</div>
-							<button class="copy-btn" onclick="copyText('displayRefreshToken')">复制</button>
 						</div>
 					</div>
 					
@@ -539,50 +541,38 @@ async function handleCallback(request: Request): Promise<Response> {
 			<script>
 				const authCode = '${code}';
 				let credentials = {};
-				
-				// 页面加载时自动尝试获取token
+						// 页面加载时自动尝试获取token
 				window.onload = function() {
 					const clientId = localStorage.getItem('onedrive_client_id');
 					const clientSecret = localStorage.getItem('onedrive_client_secret');
 					
 					if (clientId) {
-						document.getElementById('clientId').value = clientId;
+						document.getElementById('inputClientIdText').textContent = clientId;
+					} else {
+						document.getElementById('inputClientIdText').textContent = '未找到存储的 Client ID';
 					}
+					
 					if (clientSecret) {
-						document.getElementById('clientSecret').value = clientSecret;
+						document.getElementById('inputClientSecretText').textContent = clientSecret;
+					} else {
+						document.getElementById('inputClientSecretText').textContent = '未找到存储的 Client Secret';
 					}
 					
 					// 如果都有值，自动执行
 					if (clientId && clientSecret) {
-						exchangeToken();
-					} else {
-						// 监听输入变化，当两个都有值时自动执行
-						document.getElementById('clientId').addEventListener('input', checkAndExchange);
-						document.getElementById('clientSecret').addEventListener('input', checkAndExchange);
+						// 延迟执行，给用户时间看到凭据信息
+						setTimeout(exchangeToken, 1000);
 					}
-				};
-
-				function checkAndExchange() {
-					const clientId = document.getElementById('clientId').value.trim();
-					const clientSecret = document.getElementById('clientSecret').value.trim();
-					
-					if (clientId && clientSecret) {
-						// 延迟执行，给用户一点时间看到输入完成
-						setTimeout(exchangeToken, 500);
-					}
-				}
-
-				async function exchangeToken() {
-					const clientId = document.getElementById('clientId').value.trim();
-					const clientSecret = document.getElementById('clientSecret').value.trim();
+				};				async function exchangeToken() {
+					const clientId = localStorage.getItem('onedrive_client_id');
+					const clientSecret = localStorage.getItem('onedrive_client_secret');
 
 					if (!clientId || !clientSecret) {
+						document.getElementById('error').style.display = 'block';
+						document.getElementById('error').textContent = '错误: 未找到存储的 Client ID 或 Client Secret';
 						return;
 					}
 
-					// 禁用输入
-					document.getElementById('clientId').disabled = true;
-					document.getElementById('clientSecret').disabled = true;
 					document.getElementById('loading').style.display = 'block';
 					document.getElementById('error').style.display = 'none';
 
@@ -623,26 +613,19 @@ async function handleCallback(request: Request): Promise<Response> {
 							document.getElementById('inputSection').style.display = 'none';
 						} else {
 							throw new Error(result.error || '获取 token 失败');
-						}
-					} catch (error) {
+						}					} catch (error) {
 						document.getElementById('loading').style.display = 'none';
 						document.getElementById('error').style.display = 'block';
 						document.getElementById('error').textContent = '错误: ' + error.message;
-						// 重新启用输入
-						document.getElementById('clientId').disabled = false;
-						document.getElementById('clientSecret').disabled = false;
 					}
-				}
-
-				function copyText(containerId) {
-					const container = document.getElementById(containerId);
-					const textElement = container.querySelector('span');
+				}				function copyText(spanId) {
+					const textElement = document.getElementById(spanId);
 					const text = textElement.textContent;
-					const button = container.parentElement.querySelector('.copy-btn');
+					const container = textElement.parentElement;
 					
 					copyToClipboard(text).then(() => {
 						showCopyFeedback();
-						updateButtonState(button);
+						updateContainerState(container);
 					});
 				}
 
@@ -660,7 +643,7 @@ Access Token: \${credentials.accessToken}
 Refresh Token: \${credentials.refreshToken}\`;
 					
 					copyToClipboard(allText).then(() => {
-						showCopyFeedback('所有凭据已复制到剪贴板');
+						showCopyFeedback('✅ 所有凭据已复制到剪贴板');
 					});
 				}
 
@@ -676,18 +659,13 @@ Refresh Token: \${credentials.refreshToken}\`;
 						document.body.removeChild(textArea);
 						return Promise.resolve();
 					});
-				}
-
-				// 统一的按钮状态更新函数
-				function updateButtonState(button) {
-					const originalText = button.textContent;
-					button.textContent = '已复制';
-					button.classList.add('copied');
+				}				// 统一的容器状态更新函数
+				function updateContainerState(container) {
+					container.classList.add('copied');
 					
 					setTimeout(() => {
-						button.textContent = originalText;
-						button.classList.remove('copied');
-					}, 2000);
+						container.classList.remove('copied');
+					}, 1000);
 				}
 
 				function showCopyFeedback(message = '✅ 已复制到剪贴板') {
