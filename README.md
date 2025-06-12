@@ -2,7 +2,7 @@
 
 一个运行在 Cloudflare Workers 上的 OneDrive API 令牌获取工具，包括 Access Token 和 Refresh Token。
 
-基于 [alist-onedrive-token](https://github.com/RedwindA/alist-onedrive-token) 改进，部署方式改为 Workers，并完善了 Token 获取流程。
+基于 [alist-onedrive-token](https://github.com/RedwindA/alist-onedrive-token) 修改，添加了自动获取Token的步骤，无需手动发送请求。
 
 ---
 
